@@ -21,14 +21,12 @@ const (
 type PasteServiceOp struct {
 	client *Client
 }
-
 type PasteService interface {
+	List(context.Context, *PasteListRequest) ([]Paste, *Response, error)
 	Create(context.Context, *PasteRequest) (*Paste, *Response, error)
 	Delete(context.Context, *PasteDeleteRequest) (*Response, error)
-	List(context.Context, *PasteListRequest) ([]Paste, *Response, error)
 	GetRaw(ctx context.Context, rpr *PasteGetRawRequest) ([]byte, *Response, error)
 }
-
 type PasteRequest struct {
 	APIDevKey  string `json:"api_dev_key,omitempty"`
 	APIUserKey string `json:"api_user_key,omitempty"`
@@ -41,7 +39,6 @@ type PasteRequest struct {
 	APIPastePrivate    string `json:"api_paste_private,omitempty"`
 	APIPasteExpireDate string `json:"api_paste_expire_date,omitempty"`
 }
-
 type PasteDeleteRequest struct {
 	APIDevKey  string `json:"api_dev_key,omitempty"`
 	APIUserKey string `json:"api_user_key,omitempty"`
@@ -49,7 +46,6 @@ type PasteDeleteRequest struct {
 
 	APIPasteKey string `json:"api_paste_key,omitempty"`
 }
-
 type PasteListRequest struct {
 	APIDevKey  string `json:"api_dev_key,omitempty"`
 	APIUserKey string `json:"api_user_key,omitempty"`
@@ -57,7 +53,6 @@ type PasteListRequest struct {
 
 	APIResultsLimit string `json:"api_results_limit,omitempty"`
 }
-
 type PasteGetRawRequest struct {
 	APIDevKey  string `json:"api_dev_key,omitempty"`
 	APIUserKey string `json:"api_user_key,omitempty"`
@@ -76,6 +71,38 @@ type Paste struct {
 	PasteFormatLong  string `xml:"paste_format_long"`
 	PasteFormatShort string `xml:"paste_format_short"`
 	PasteHits        string `xml:"paste_hits"`
+}
+
+func (ps *PasteServiceOp) List(ctx context.Context, plr *PasteListRequest) ([]Paste, *Response, error) {
+
+	plr.APIDevKey = ps.client.APIDevKey
+	plr.APIUserKey = ps.client.APIUserKey
+	plr.APIOption = "list"
+
+	req, err := ps.client.NewRequest(ctx, http.MethodPost, pasteBasePath, plr)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, err := ps.client.Do(ctx, req.request)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var pastes []Paste
+	d := xml.NewDecoder(bytes.NewBufferString(resp.response.String()))
+	for {
+		var t Paste
+		err := d.Decode(&t)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		pastes = append(pastes, t)
+	}
+	return pastes, resp, nil
 }
 
 func (ps *PasteServiceOp) Create(ctx context.Context, pr *PasteRequest) (*Paste, *Response, error) {
@@ -113,38 +140,6 @@ func (ps *PasteServiceOp) Delete(ctx context.Context, pdr *PasteDeleteRequest) (
 	}
 
 	return resp, nil
-}
-
-func (ps *PasteServiceOp) List(ctx context.Context, plr *PasteListRequest) ([]Paste, *Response, error) {
-
-	plr.APIDevKey = ps.client.APIDevKey
-	plr.APIUserKey = ps.client.APIUserKey
-	plr.APIOption = "list"
-
-	req, err := ps.client.NewRequest(ctx, http.MethodPost, pasteBasePath, plr)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	resp, err := ps.client.Do(ctx, req.request)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var pastes []Paste
-	d := xml.NewDecoder(bytes.NewBufferString(resp.response.String()))
-	for {
-		var t Paste
-		err := d.Decode(&t)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			log.Fatal(err)
-		}
-		pastes = append(pastes, t)
-	}
-	return pastes, resp, nil
 }
 
 func (ps *PasteServiceOp) GetRaw(ctx context.Context, rpr *PasteGetRawRequest) ([]byte, *Response, error) {
