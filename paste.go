@@ -75,8 +75,14 @@ type Paste struct {
 
 func (ps *PasteServiceOp) List(ctx context.Context, plr *PasteListRequest) ([]Paste, *Response, error) {
 
-	plr.APIDevKey = ps.client.APIDevKey
-	plr.APIUserKey = ps.client.APIUserKey
+	if plr.APIDevKey == "" {
+		plr.APIDevKey = ps.client.APIDevKey
+	}
+
+	if plr.APIUserKey == "" {
+		plr.APIUserKey = ps.client.APIUserKey
+	}
+
 	plr.APIOption = "list"
 
 	req, err := ps.client.NewRequest(ctx, http.MethodPost, pasteBasePath, plr)
@@ -107,8 +113,14 @@ func (ps *PasteServiceOp) List(ctx context.Context, plr *PasteListRequest) ([]Pa
 
 func (ps *PasteServiceOp) Create(ctx context.Context, pr *PasteRequest) (*Paste, *Response, error) {
 
-	pr.APIDevKey = ps.client.APIDevKey
-	pr.APIUserKey = ps.client.APIUserKey
+	if pr.APIDevKey == "" {
+		pr.APIDevKey = ps.client.APIDevKey
+	}
+
+	if pr.APIUserKey == "" {
+		pr.APIUserKey = ps.client.APIUserKey
+	}
+
 	pr.APIOption = "paste"
 
 	req, err := ps.client.NewRequest(ctx, http.MethodPost, pasteBasePath, pr)
@@ -125,8 +137,15 @@ func (ps *PasteServiceOp) Create(ctx context.Context, pr *PasteRequest) (*Paste,
 }
 
 func (ps *PasteServiceOp) Delete(ctx context.Context, pdr *PasteDeleteRequest) (*Response, error) {
-	pdr.APIDevKey = ps.client.APIDevKey
-	pdr.APIUserKey = ps.client.APIUserKey
+
+	if pdr.APIDevKey == "" {
+		pdr.APIDevKey = ps.client.APIDevKey
+	}
+
+	if pdr.APIUserKey == "" {
+		pdr.APIUserKey = ps.client.APIUserKey
+	}
+
 	pdr.APIOption = "delete"
 
 	req, err := ps.client.NewRequest(ctx, http.MethodPost, pasteBasePath, pdr)
@@ -143,8 +162,14 @@ func (ps *PasteServiceOp) Delete(ctx context.Context, pdr *PasteDeleteRequest) (
 }
 
 func (ps *PasteServiceOp) GetRaw(ctx context.Context, rpr *PasteGetRawRequest) ([]byte, *Response, error) {
-	rpr.APIDevKey = ps.client.APIDevKey
-	rpr.APIUserKey = ps.client.APIUserKey
+	if rpr.APIDevKey == "" {
+		rpr.APIDevKey = ps.client.APIDevKey
+	}
+
+	if rpr.APIUserKey == "" {
+		rpr.APIUserKey = ps.client.APIUserKey
+	}
+
 	rpr.APIOption = "show_paste"
 
 	req, err := ps.client.NewRequest(ctx, http.MethodPost, rawPasteBasePath, rpr)
