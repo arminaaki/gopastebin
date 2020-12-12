@@ -30,7 +30,7 @@ type AccountRequest struct {
 	APIUserPassword string `json:"api_user_password"`
 }
 
-// Account TODO
+// Account struct
 type Account struct {
 	APIUserKey string `json:"api_user_key"`
 }
